@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    
+    <style>
+      /* Кнопка старта для обхода блокировок браузера */
+      #ui {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8); z-index: 1000;
+        display: flex; justify-content: center; align-items: center;
+      }
+      #ui button {
+        padding: 20px 40px; font-size: 20px; cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="ui">
+      <button id="startButton">Запустить AR</button>
+    </div>
+
+    <a-scene 
+      mindar-image="imageTargetSrc:targets.mind; autoStart: false;" 
+      color-space="sRGB" 
+      renderer="colorManagement: true, physicallyCorrectLights" 
+      vr-mode-ui="enabled: false" 
+      device-orientation-permission-ui="enabled: false">
+      
+      <a-assets>
+        <a-asset-item id="catModel" src="little_cat.glb" "></a-asset-item>
+        <video id="videoAsset" src="23009-332257760_medium.mp4" 
+               preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="far: 10000; objects:clickable"></a-camera>
+
+      <a-entity id="target0" mindar-image-target="targetIndex: 0">
+        <a-video src="#videoAsset" width="1" height="0.6" position="0 0 0"></a-video>
+      </a-entity>
+
+      <a-entity id="target1" mindar-image-target="targetIndex: 1">
+        <a-gltf-model src="#catModel" rotation="0 0 0" position="0 0 0" scale="0.5 0.5 0.5"></a-gltf-model>
+      </a-entity>
+      
+    </a-scene>
+
+    <script>
+      const startButton = document.querySelector("#startButton");
+      const sceneEl = document.querySelector('a-scene');
+      const video = document.querySelector('#videoAsset');
+
+      startButton.addEventListener('click', () => {
+        document.querySelector("#ui").style.display = "none";
+        sceneEl.systems['mindar-image-system'].start();
+        video.play().then(() => {
+            video.pause();
+        });
+      });
+      const target0 = document.querySelector('#target0');
+      target0.addEventListener("targetFound", () => {
+          video.play();
+          console.log("Hutao найдена, видео играет");
+      });
+      target0.addEventListener("targetLost", () => {
+          video.pause();
+      });
+    </script>
+  </body>
+</html>
